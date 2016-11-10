@@ -1,0 +1,57 @@
+<?php
+include 'geolocalize/get_ip.php';
+
+/**
+ * Implements hook_help().
+ *
+ * Displays help and module information.
+ *
+ * @param path 
+ *   Which path of the site we're using to display help
+ * @param arg 
+ *   Array that holds the current path as returned from arg() function
+ */
+function geohide_help($path, $arg) {
+  switch ($path) {
+    case "admin/help#geohide":
+      return '' . t("Geolocalize a visitor and hide any given field depending on node's title") . '';
+      break;
+  }
+} 
+
+
+
+/**
+ * Implements hook_node_view().
+ *
+ * Changes the way the node information is displayed on screen.
+ *
+ * In this case, it was added a geographic filter to avoid using ip2location or geoplugin webservice to filter the showing of field phonenumber
+ */
+ 
+function geohide_node_view($node, $view_mode) {
+	$ip = getIP();
+	
+	// Uncomment these lines if you want to use ip2location xml webservice
+	// $xml = simplexml_load_file("http://api.ip2location.com/?ip={$ip}&key=demo&package=WS3&format=xml");
+	// $cityvisitor = $xml->city_name;
+	
+	// Uncomment these lines if you want to use geoplugin xml webservice
+	//$xml = simplexml_load_file("http://www.geoplugin.net/xml.gp?ip={$ip}");
+	//$cityvisitor = $xml->geoplugin_city;
+	
+	// Uncomment these lines if you want to use ip2location json webservice
+	$json = file_get_contents("http://api.ip2location.com/?ip={$ip}&key=demo&package=WS3&format=json");
+	$array = json_decode($json, true);
+	$cityvisitor = $array['city_name'];
+	
+	
+    if ($node->title=="nodetitle" && $cityvisitor=='cityvisitor'){
+        if ($view_mode == 'full'){
+            $node->content['field_phonenumber']['#access'] = FALSE;     
+           }
+         return $node;
+    }    
+}
+
+
