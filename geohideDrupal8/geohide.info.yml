@@ -1,0 +1,6 @@
+name: Geolocalize and Hide
+description: Geolocalize a visitor and hide any given field depending on node's title
+core: 8.x 
+package: Custom
+type: module
+version: 1.0

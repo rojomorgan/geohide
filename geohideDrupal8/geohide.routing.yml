@@ -1,0 +1,7 @@
+geohide.content:
+  path: '/geohide'
+  defaults:
+    _controller: 'Drupal\geohide\Controller\GeohideController::getIP'
+    _title: 'Geohide'
+  requirements:
+    _permission: 'access content'

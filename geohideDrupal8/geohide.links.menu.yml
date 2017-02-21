@@ -1,0 +1,6 @@
+geohide.admin:
+  title: 'Geohide module settings'
+  description: 'Custom Geohide module'
+  parent: system.admin_config_development
+  route_name: geohide.content
+  weight: 100
