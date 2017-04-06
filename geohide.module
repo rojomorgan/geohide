@@ -1,6 +1,4 @@
 <?php
-include 'geolocalize/get_ip.php';
-
 /**
  * Implements hook_help().
  *
@@ -32,26 +30,111 @@ function geohide_help($path, $arg) {
 function geohide_node_view($node, $view_mode) {
 	$ip = getIP();
 	
+	
 	// Uncomment these lines if you want to use ip2location xml webservice
 	// $xml = simplexml_load_file("http://api.ip2location.com/?ip={$ip}&key=demo&package=WS3&format=xml");
 	// $cityvisitor = $xml->city_name;
 	
 	// Uncomment these lines if you want to use geoplugin xml webservice
-	//$xml = simplexml_load_file("http://www.geoplugin.net/xml.gp?ip={$ip}");
-	//$cityvisitor = $xml->geoplugin_city;
+	$xml = simplexml_load_file("http://www.geoplugin.net/xml.gp?ip=37.35.209.66");
+	$countryvisitor = $xml->geoplugin_countryName;
 	
 	// Uncomment these lines if you want to use ip2location json webservice
-	$json = file_get_contents("http://api.ip2location.com/?ip={$ip}&key=demo&package=WS3&format=json");
-	$array = json_decode($json, true);
-	$cityvisitor = $array['city_name'];
 	
+	// Retrieving form fields
+	$name = variable_get('geohide_form_node',"");
+	$field = variable_get('geohide_form_field',"");
+	$country = variable_get('geohide_form_country',"");
 	
-    if ($node->title=="nodetitle" && $cityvisitor=='cityvisitor'){
+
+    if ($node->title==$name && $countryvisitor==$country){
         if ($view_mode == 'full'){
-            $node->content['field_phonenumber']['#access'] = FALSE;     
+            $node->content[$field]['#access'] = FALSE;     
            }
          return $node;
     }    
 }
+/**
+* Implement hook_menu().
+*/
+function geohide_menu(){
+	$item = array();
+	$item['admin/config/content/geohide'] =  array(
+		'title' => t('Configuration of geohide'),
+		'description' => t('Configuration the geohide module'),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('geohide_form'),
+		'access arguments' => array('administer geohide settings'),
+		'type' => MENU_NORMAL_ITEM,
+		);
+	return $item;
+}
 
+/**
+* Implements hook_permission().
+*/
+function geohide_permission(){
+	return  array(
+			'administer geohide settings' => array(
+			'title' => t('Administer geohide Configurations'),
+			'description' => t('Perform administration tasks for geohide'),
+			'restrict access' => true,
+			),
+		);
+	}
+	
 
+/**
+*
+* @return array The form structure.
+*/
+function geohide_form($form, &$form_state){
+	$form['geohide_form'] = array(
+		'#title' => t('Geohide Configuration'),
+		'#type' => 'fieldset',
+		'#description' => t('Configuration the geohide module'),
+		);
+	$form['geohide_form_node'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Enter node name'),
+		'#default_value' => variable_get('geohide_form_node', "geohide"),
+		'#description' => t("Enter the node title you want to hide. Example: HelloWorld"),
+		'#required' => TRUE,
+		);
+	$form['geohide_form_field'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Enter system name the field'),
+		'#default_value' => variable_get('geohide_form_field', "geohide"),
+		'#description' => t("Enter the field you want to hide. Example: field_phonenumber"),
+		'#required' => TRUE,
+		);
+	$form['geohide_form_country'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Enter country name'),
+		'#default_value' => variable_get('geohide_form_country', "geohide"),
+		'#description' => t("Enter the name of the country that you want the field to be hidden from. Example: Spain"),
+		'#required' => TRUE,
+		);
+	return system_settings_form($form);
+}
+/*
+* Get ip
+*/
+function getIP() {
+     if (isset($_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    } elseif (isset($_SERVER['HTTP_X_FORWARDED'])) {
+        $ip = $_SERVER['HTTP_X_FORWARDED'];
+    } elseif (isset($_SERVER['HTTP_FORWARDED_FOR'])) {
+        $ip = $_SERVER['HTTP_FORWARDED_FOR'];
+    } elseif (isset($_SERVER['HTTP_FORWARDED'])) {
+        $ip = $_SERVER['HTTP_FORWARDED'];
+    } elseif (isset($_SERVER['REMOTE_ADDR'])) {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    } else {
+        $ip = 'UNKNOWN';
+    }
+    return $ip;
+}

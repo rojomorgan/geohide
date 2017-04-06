@@ -1,3 +1,4 @@
 name = Geolocalize and Hide
 description = Geolocalize a visitor and hide any given field depending on node's title
 core = 7.x 
+configure = admin/config/content/geohide
