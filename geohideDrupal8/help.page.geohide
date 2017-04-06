@@ -1,0 +1,9 @@
+use Drupal\Core\Routing\RouteMatchInterface;
+
+function geohide_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case "help.page.geohide":
+      return '' . t("Geolocalize a visitor and hide any given field depending on node's title") . '';
+      break;
+  }
+} 
